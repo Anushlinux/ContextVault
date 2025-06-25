@@ -1,18 +1,23 @@
-import { useState } from 'react';
-import reactLogo from '@/assets/react.svg';
-import wxtLogo from '/wxt.svg';
-import './App.css';
+import { useState } from "react";
+import reactLogo from "@/assets/react.svg";
+import { createRoot } from "react-dom/client";
+import wxtLogo from "/wxt.svg";
+import "./App.css";
+import Popup from "./popup"; // Import Popup component
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
-    <>
-      <div>
-        <a href="https://wxt.dev" target="_blank">
+    <div>
+      {/* Render Popup component */}
+      <Popup />
+
+      {/* <div>
+        <a href="https://wxt.dev" target="_blank" rel="noopener noreferrer">
           <img src={wxtLogo} className="logo" alt="WXT logo" />
         </a>
-        <a href="https://react.dev" target="_blank">
+        <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
@@ -27,9 +32,11 @@ function App() {
       </div>
       <p className="read-the-docs">
         Click on the WXT and React logos to learn more
-      </p>
-    </>
+      </p> */}
+    </div>
   );
 }
+
+createRoot(document.getElementById("root")!).render(<App />);
 
 export default App;
