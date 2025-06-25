@@ -3,6 +3,8 @@ import { uploadToIPFS, downloadFromIPFS } from "./ipfsStorage";
 import { encryptContext, decryptContext, generateKey } from "./encryption";
 import { setHash, getHash } from "./contextBridge";
 import { sha256ToFeltDecimal } from "./hashToFelt";
+import { contextRegistry, provider } from "./starknet"; // Add this import
+import { ab2b64, b642ab } from "./base64";
 
 export interface UserContext {
   preferences: {
@@ -22,30 +24,22 @@ export interface UserContext {
   }[];
 }
 
+
 export async function saveUserContext(context: UserContext): Promise<string> {
-  // 1. Generate or retrieve user's encryption key
+  // Steps 1-3 stay the same
   const key = await generateKey();
-
-  // 2. Encrypt context
   const encryptedData = await encryptContext(context, key);
-
-  // 3. Upload to IPFS
   const cid = await uploadToIPFS(encryptedData);
 
-  // 4. Store hash on blockchain
-  const hashBytes = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(cid)
-  );
-  const hashHex = Array.from(new Uint8Array(hashBytes))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  // 4. Convert CID to felt252 and store on blockchain
+  const feltHash = await sha256ToFeltDecimal(cid);
+  const tx = await contextRegistry.set_context_hash(feltHash);
+  await provider.waitForTransaction(tx.transaction_hash);
 
-  await setHash(hashHex);
-
-  // 5. Store key locally (browser storage)
+  const rawKey = await crypto.subtle.exportKey("raw", key); // ArrayBuffer
+  // 5. Store encryption key locally
   await chrome.storage.local.set({
-    [`context_key_${cid}`]: await crypto.subtle.exportKey("raw", key),
+    [`context_key_${cid}`]: ab2b64(rawKey), // ✅ JSON-friendly
     current_cid: cid,
   });
 
@@ -74,10 +68,17 @@ export async function loadUserContext(): Promise<UserContext | null> {
       await chrome.storage.local.get([`context_key_${current_cid}`]);
     if (!keyData) return null;
 
+    const entry = await chrome.storage.local.get([
+      `context_key_${current_cid}`,
+    ]);
+    const b64 = entry[`context_key_${current_cid}`];
+    if (!b64) return null;
+
+    const raw = b642ab(b64);
     const key = await crypto.subtle.importKey(
       "raw",
-      keyData,
-      "AES-GCM",
+      raw,
+      { name: "AES-GCM" },
       false,
       ["decrypt"]
     );
