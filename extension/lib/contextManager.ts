@@ -1,4 +1,5 @@
 // extension/lib/contextManager.ts
+import { userContext } from "./types/userContext";
 import { uploadToIPFS, downloadFromIPFS } from "./ipfsStorage";
 import { encryptContext, decryptContext, generateKey } from "./encryption";
 import { setHash, getHash } from "./contextBridge";

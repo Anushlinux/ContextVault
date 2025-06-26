@@ -15,11 +15,15 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@argent/get-starknet": "^6.4.7",
+    "@starknet-io/get-starknet": "^4.0.7",
+    "@starknet-react/core": "^3.7.4",
     "ipfs-http-client": "^60.0.1",
     "pinata-web3": "^0.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "starknet": "^7.6.2",
+    "starknetkit": "^2.12.1",
     "web3.storage": "^4.5.5"
   },
   "devDependencies": {
