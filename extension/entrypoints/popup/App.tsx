@@ -1,7 +1,5 @@
 import { useState } from "react";
-import reactLogo from "@/assets/react.svg";
 import { createRoot } from "react-dom/client";
-import wxtLogo from "/wxt.svg";
 import "./App.css";
 import Popup from "./popup"; // Import Popup component
 
